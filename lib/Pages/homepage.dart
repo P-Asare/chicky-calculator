@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 
 import '../mod/mybutton.dart';
+import 'package:math_expressions/math_expressions.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,6 +13,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   var questionText = '';
   var answerText = '';
+  var previousAns = '';
 
   final List<String> buttonVals = [
     "C",
@@ -83,6 +85,19 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  double evaluateExp(String expres) {
+    // correct multiplication symbol
+    expres = expres.replaceAll('x', '*');
+
+    // Evaluate expression
+    Parser p = Parser();
+    Expression exp = p.parse(expres);
+    ContextModel cm = ContextModel();
+    double eval = exp.evaluate(EvaluationType.REAL, cm);
+
+    return eval;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -144,11 +159,21 @@ class _HomePageState extends State<HomePage> {
                   if (val == 'C') {
                     setState(() {
                       questionText = '';
+                      answerText = '';
                     });
                   } else if (val == 'Del') {
                     setState(() {
                       questionText =
                           questionText.substring(0, questionText.length - 1);
+                    });
+                  } else if (val == "=") {
+                    setState(() {
+                      answerText = evaluateExp(questionText).toString();
+                      previousAns = answerText;
+                    });
+                  } else if (val == 'ANS') {
+                    setState(() {
+                      questionText += previousAns;
                     });
                   } else {
                     setState(() {
